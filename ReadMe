@@ -1,0 +1,9 @@
+直譯器版本 Python 3.7
+Tensorflow 版本 2.1.0
+
+
+https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/33918/
+在 Tensorflow 2.1 版中不存在 tf.train.string_input_producer()。
+tf.TFRecordReader() 也不存在，雖然可以用 tf.compat.v1.TFRecordReader() ，但會出現錯誤: Readers are not supported when eager execution is enabled. Instead, please use tf.data to get data into your model.
+因此到官網查 API 重寫程式碼。
+官網 API: https://www.tensorflow.org/tutorials/load_data/tfrecord
