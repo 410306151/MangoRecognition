@@ -27,7 +27,7 @@ def make_dataset(fileName, folderName):
     # 讀取 csv 檔， csv 存放每張圖片的分類等級
     fileTrain = pds.read_csv(fileName + '.csv', encoding='big5')
     # TFRecord 的檔名
-    writer = tf.io.TFRecordWriter('train.tfrecords')
+    writer = tf.io.TFRecordWriter('train_' + fileName + '.tfrecords')
 
     for i in range(fileTrain.shape[0]):
         # 將圖片讀成二進制
@@ -85,13 +85,13 @@ def see_without_loop(filename):
     # 建構成一個 iterator
     #data1 = iter(image_batch).next()
     #print(data1['label'][60:])
-    
+
     # 建構成一個 list
     data2 = list(parsed_image_dataset)
-    print(data2[0]['label'])
+    print(data2[0]['label'].numpy())
 
-fileName = 'label' # label 、dev 、train
-folderName = 'sample_image' # sample_image 、C1-P1_Dev 、 C1-P1_Train
+fileName = 'train' # label 、dev 、train
+folderName = 'C1-P1_Train' # sample_image 、C1-P1_Dev 、 C1-P1_Train
 #make_dataset(fileName, folderName)
-#read_and_decode('train.tfrecords')
-see_without_loop('train.tfrecords')
+#read_and_decode('train_' + fileName + '.tfrecords')
+#see_without_loop('train_' + fileName + '.tfrecords')
