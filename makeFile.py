@@ -1,6 +1,6 @@
 import tensorflow as tf
 import pandas as pds
-import IPython.display as display
+from IPython.display import Image, display
 
 # Create a description of the features.
 feature_description = {
@@ -15,6 +15,10 @@ def _bytes_feature(value):
     if isinstance(value, type(tf.constant(0))):
         value = value.numpy() # BytesList won't unpack a string from an EagerTensor.
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+def _parse_function(example_proto):
+    # Parse the input `tf.Example` proto using the dictionary above.
+    return tf.io.parse_single_example(example_proto, feature_description)
 
 def make_dataset(fileName, folderName):
     # 讀取 csv 檔， csv 存放每張圖片的分類等級
@@ -40,10 +44,6 @@ def make_dataset(fileName, folderName):
         writer.write(example.SerializeToString())
     writer.close()
 
-def _parse_function(example_proto):
-    # Parse the input `tf.Example` proto using the dictionary above.
-    return tf.io.parse_single_example(example_proto, feature_description)
-
 def read_and_decode(filename):
     # 讀入 TFRecords 檔
     file = tf.data.TFRecordDataset(filename)
@@ -52,9 +52,9 @@ def read_and_decode(filename):
     # 顯示圖片
     for image_features in parsed_image_dataset:
         image_raw = image_features['img_raw'].numpy()
-        display.display(display.Image(data = image_raw))
+        display(Image(data = image_raw))
 
-fileName = 'label'
-folderName = 'sample_image'
+fileName = 'train' # label 、dev 、train
+folderName = 'C1-P1_Train' # sample_image 、C1-P1_Dev 、 C1-P1_Train
 #make_dataset(fileName, folderName)
 read_and_decode('train.tfrecords')
