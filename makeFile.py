@@ -1,8 +1,8 @@
 import tensorflow as tf
 import pandas as pds
+import matplotlib.pyplot as plt
 from IPython import display
 from PIL import Image
-import matplotlib.pyplot as plt
 
 # Create a description of the features.
 feature_description = {
@@ -58,9 +58,11 @@ def read_and_decode(filename):
     file = tf.data.TFRecordDataset(filename)
     # Parse Data
     parsed_image_dataset = file.map(_parse_function)
+
     i = 0
     # 顯示圖片
     for image_features in parsed_image_dataset:
+        #print(type(image_features))
         if doResize :
             image = tf.io.decode_raw(image_features['img_raw'], tf.uint8)
             image = tf.reshape(image, [256, 256, 3])
@@ -70,9 +72,26 @@ def read_and_decode(filename):
             i += 1
         else:
             image = tf.io.decode_raw(image_features['img_raw'], tf.uint8)
-            display.display(display.Image(data = image))
+            #display.display(display.Image(data = image))
+
+def see_without_loop(filename):
+    # 讀入 TFRecords 檔
+    file = tf.data.TFRecordDataset(filename)
+    # Parse Data
+    parsed_image_dataset = file.map(_parse_function)
+
+    # len(list(dataset)) 在大量資料下會變得很慢，因為先把 iterator 變成 list 來算筆數
+    #image_batch = parsed_image_dataset.batch(len(list(parsed_image_dataset)))
+    # 建構成一個 iterator
+    #data1 = iter(image_batch).next()
+    #print(data1['label'][60:])
+    
+    # 建構成一個 list
+    data2 = list(parsed_image_dataset)
+    print(data2[0]['label'])
 
 fileName = 'label' # label 、dev 、train
 folderName = 'sample_image' # sample_image 、C1-P1_Dev 、 C1-P1_Train
-make_dataset(fileName, folderName)
-read_and_decode('train.tfrecords')
+#make_dataset(fileName, folderName)
+#read_and_decode('train.tfrecords')
+see_without_loop('train.tfrecords')
