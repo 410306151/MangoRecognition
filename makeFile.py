@@ -1,6 +1,8 @@
 import tensorflow as tf
 import pandas as pds
-from IPython.display import Image, display
+from IPython import display
+from PIL import Image
+import matplotlib.pyplot as plt
 
 # Create a description of the features.
 feature_description = {
@@ -21,6 +23,7 @@ def _parse_function(example_proto):
     return tf.io.parse_single_example(example_proto, feature_description)
 
 def make_dataset(fileName, folderName):
+    doResize = False
     # 讀取 csv 檔， csv 存放每張圖片的分類等級
     fileTrain = pds.read_csv(fileName + '.csv', encoding='big5')
     # TFRecord 的檔名
@@ -28,7 +31,12 @@ def make_dataset(fileName, folderName):
 
     for i in range(fileTrain.shape[0]):
         # 將圖片讀成二進制
-        img_raw = open(folderName + '/' + fileTrain.iloc[i, 0], 'rb').read()
+        if doResize :
+            img = Image.open(folderName + '/' + fileTrain.iloc[i, 0])
+            img = img.resize((256, 256))
+            img_raw = img.tobytes()
+        else :
+            img_raw = open(folderName + '/' + fileTrain.iloc[i, 0], 'rb').read()
         if fileTrain.iloc[i, 1].upper() == 'A':
             label = 0
         elif fileTrain.iloc[i, 1].upper() == 'B':
@@ -45,16 +53,26 @@ def make_dataset(fileName, folderName):
     writer.close()
 
 def read_and_decode(filename):
+    doResize = False
     # 讀入 TFRecords 檔
     file = tf.data.TFRecordDataset(filename)
     # Parse Data
     parsed_image_dataset = file.map(_parse_function)
+    i = 0
     # 顯示圖片
     for image_features in parsed_image_dataset:
-        image_raw = image_features['img_raw'].numpy()
-        display(Image(data = image_raw))
+        if doResize :
+            image = tf.io.decode_raw(image_features['img_raw'], tf.uint8)
+            image = tf.reshape(image, [256, 256, 3])
+            plt.imshow(image)
+            plt.title(i)
+            plt.show()
+            i += 1
+        else:
+            image = tf.io.decode_raw(image_features['img_raw'], tf.uint8)
+            display.display(display.Image(data = image))
 
-fileName = 'train' # label 、dev 、train
-folderName = 'C1-P1_Train' # sample_image 、C1-P1_Dev 、 C1-P1_Train
-#make_dataset(fileName, folderName)
+fileName = 'label' # label 、dev 、train
+folderName = 'sample_image' # sample_image 、C1-P1_Dev 、 C1-P1_Train
+make_dataset(fileName, folderName)
 read_and_decode('train.tfrecords')
