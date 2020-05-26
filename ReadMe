@@ -16,3 +16,9 @@ tf.TFRecordReader() 也不存在，雖然可以用 tf.compat.v1.TFRecordReader()
 芒果圖片大小有五種: 1536x1152 、 1344x1008 、 1280x720 、 1152x1536 、 1088x816
 
 ########################################################################
+
+https://ithelp.ithome.com.tw/articles/10222821
+用 iterator 來取資料，但 tensorflow 2.1 已經沒有 make_initializable_iterator() 了，改用 iter(DataSet).next
+
+########################################################################
+
