@@ -101,6 +101,7 @@ def training(filename):
     model = build_model()
     #model.summary()
 
+    # 取資料後訓練
     test = []
     test_label = []
     for i in range(50):
@@ -108,7 +109,9 @@ def training(filename):
         test.append(tf.reshape(temp, [256, 256, 3]).numpy())
         test_label.append(data['label'][i])
     test = np.array(test)
-    #model.fit(test.reshape(test.shape[0], 256, 256, 3), data['label'][0:50],  epochs = 60, verbose = 1, callbacks = [cp_callback])
+    # 模型要求要 4 dimensions ，所以在這裡做 reshape 變成四維
+    test = test.reshape(test.shape[0], 256, 256, 3)
+    #model.fit(test, data['label'][0:50],  epochs = 20, verbose = 1, callbacks = [cp_callback])
 
 fileName = 'label' # label 、dev 、train
 training('train_' + fileName + '.tfrecords')
