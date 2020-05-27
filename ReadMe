@@ -1,7 +1,7 @@
 直譯器版本 Python 3.7
 Tensorflow 版本 2.1.0
 
-
+將輸入的圖片轉成大小 256 x 256 的圖片，將像素轉成二進位字元後，跟評分等級一起寫成 tfrecords 檔，再讀取 tfrecords 把資料取出
 
 ########################################################################
 
@@ -19,6 +19,11 @@ tf.TFRecordReader() 也不存在，雖然可以用 tf.compat.v1.TFRecordReader()
 
 https://ithelp.ithome.com.tw/articles/10222821
 用 iterator 來取資料，但 tensorflow 2.1 已經沒有 make_initializable_iterator() 了，改用 iter(DataSet).next
+
+########################################################################
+
+圖片的像素已經存在陣列裡，但是模型一直回報需要 4 dimensions 的參數
+https://github.com/keras-team/keras/issues/10053
 
 ########################################################################
 
