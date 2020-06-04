@@ -6,6 +6,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras.utils import to_categorical
 
 # Create a description of the features.
 feature_description = {
@@ -48,8 +49,8 @@ def build_model():
     model.add(Conv2D(512, kernel_size = (3, 3), activation = 'relu', padding = 'same', ))
     model.add(MaxPooling2D(pool_size = (2, 2), strides = (2, 2)))
     model.add(Flatten())
-    model.add(Dense(4096, activation = 'relu'))
-    model.add(Dense(4096, activation = 'relu'))
+    model.add(Dense(2048, activation = 'relu'))
+    model.add(Dense(2048, activation = 'relu'))
     model.add(Dense(3, activation = 'softmax'))
 
     model.compile(loss = 'categorical_crossentropy', metrics = ['accuracy'])
@@ -74,7 +75,8 @@ def show_image(filename):
 
 def training(filename):
     # Checkpoint location
-    checkpoint_path = "training_1/MangoIsGood.ckpt"
+    checkpoint_path = "training_1/MangoIsGood-{epoch:04d}.ckpt"
+    #checkpoint_path = "/content/gdrive/My Drive/Mango/training_1/MangoIsGood-{epoch:04d}.ckpt"
     checkpoint_dir = os.path.dirname(checkpoint_path)
 
     # Create a callback that saves the model's weights
@@ -82,10 +84,12 @@ def training(filename):
     cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_path,
                                                      save_weights_only = True,
                                                      verbose = 1,
-                                                     period = 10)
+                                                     #save_freq = 5,
+                                                     period = 5)
 
     # 讀入 TFRecords 檔
     file = tf.data.TFRecordDataset(filename)
+    #file = tf.data.TFRecordDataset("/content/gdrive/My Drive/Mango/" + filename)
 
     # Parse Data
     parsed_image_dataset = file.map(_parse_function)
@@ -100,19 +104,25 @@ def training(filename):
     # 建構模型
     model = build_model()
     #model.summary()
+    # 如果有 checkpoint 讀取最新的 checkpoint
+    latest = tf.train.latest_checkpoint(checkpoint_dir)
+    if latest is not None:
+        model.load_weights(latest)
 
     # 取資料後訓練
-    test = []
-    test_label = []
-    for i in range(50):
+    train = []
+    label = []
+    for i in range(len(data['label'])):
         temp = tf.io.decode_raw(data['img_raw'][i], tf.uint8)
-        test.append(tf.reshape(temp, [256, 256, 3]).numpy())
-        test_label.append(data['label'][i])
-    test = np.array(test)
+        train.append(tf.reshape(temp, [256, 256, 3]).numpy())
+        label.append(data['label'][i])
+    train = np.array(train)
+    label = np.array(label)
+    label = to_categorical(label, 3)
     # 模型要求要 4 dimensions ，所以在這裡做 reshape 變成四維
-    test = test.reshape(test.shape[0], 256, 256, 3)
-    #model.fit(test, data['label'][0:50],  epochs = 20, verbose = 1, callbacks = [cp_callback])
+    train = train.reshape(train.shape[0], 256, 256, 3)
+    model.fit(train, label, batch_size = 1, epochs = 60, verbose = 2, callbacks = [cp_callback])
 
-fileName = 'label' # label 、dev 、train
+fileName = 'train' # label 、dev 、train
 training('train_' + fileName + '.tfrecords')
 #show_image('train_' + fileName + '.tfrecords')
