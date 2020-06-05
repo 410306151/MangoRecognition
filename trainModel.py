@@ -49,8 +49,8 @@ def build_model():
     model.add(Conv2D(512, kernel_size = (3, 3), activation = 'relu', padding = 'same', ))
     model.add(MaxPooling2D(pool_size = (2, 2), strides = (2, 2)))
     model.add(Flatten())
-    model.add(Dense(2048, activation = 'relu'))
-    model.add(Dense(2048, activation = 'relu'))
+    model.add(Dense(512, activation = 'relu'))
+    model.add(Dense(512, activation = 'relu'))
     model.add(Dense(3, activation = 'softmax'))
 
     model.compile(loss = 'categorical_crossentropy', metrics = ['accuracy'])
@@ -85,7 +85,7 @@ def training(filename):
                                                      save_weights_only = True,
                                                      verbose = 1,
                                                      #save_freq = 5,
-                                                     period = 5)
+                                                     period = 10)
 
     # 讀入 TFRecords 檔
     file = tf.data.TFRecordDataset(filename)
@@ -121,8 +121,8 @@ def training(filename):
     label = to_categorical(label, 3)
     # 模型要求要 4 dimensions ，所以在這裡做 reshape 變成四維
     train = train.reshape(train.shape[0], 256, 256, 3)
-    model.fit(train, label, batch_size = 1, epochs = 60, verbose = 2, callbacks = [cp_callback])
+    model.fit(train, label, batch_size = 64, epochs = 60, verbose = 2, callbacks = [cp_callback])
 
-fileName = 'train' # label 、dev 、train
+fileName = 'data' # label 、dev 、train
 training('train_' + fileName + '.tfrecords')
 #show_image('train_' + fileName + '.tfrecords')
