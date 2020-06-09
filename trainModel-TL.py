@@ -43,7 +43,7 @@ def build_model():
     model.add(vgg16)    # 將 vgg16 做為一層
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))  # 丟棄法
+    model.add(Dense(512, activation='relu'))
     model.add(Dense(3, activation='sigmoid'))
 
     model.compile(loss='categorical_crossentropy',
@@ -51,16 +51,14 @@ def build_model():
 
     return model
 
-def getTFRecordsData(filename):
-    drive = 1
-    if drive == 1:
+def getTFRecordsData(filename, googleDrive = 0):
+    if googleDrive == 1:
         googleDrivePath = "/content/gdrive/My Drive/Mango/"
     else:
         googleDrivePath = ""
 
     # 讀入 TFRecords 檔
-    file = tf.data.TFRecordDataset(filename)
-    #file = tf.data.TFRecordDataset(googleDrivePath + filename)
+    file = tf.data.TFRecordDataset(googleDrivePath + filename)
 
     # Parse Data
     parsed_image_dataset = file.map(_parse_function)
@@ -87,8 +85,8 @@ def show_image(filename):
         i += 1
 
 def training(filename):
-    drive = 1
-    if drive == 1:
+    googleDrive = 0
+    if googleDrive == 1:
         googleDrivePath = "/content/gdrive/My Drive/Mango/"
     else:
         googleDrivePath = ""
@@ -105,13 +103,7 @@ def training(filename):
                                                      period = 10)
 
     # 讀入 TFRecords 檔
-    file = tf.data.TFRecordDataset(googleDrivePath + filename)
-
-    # Parse Data
-    parsed_image_dataset = file.map(_parse_function)
-
-    # len(list(dataset)) 在大量資料下會變得很慢，因為先把 iterator 變成 list 來算筆數
-    image_batch = parsed_image_dataset.batch(len(list(parsed_image_dataset)))
+    image_batch = getTFRecordsData(filename, googleDrive)
 
     # 建構成一個 iterator
     data = iter(image_batch).next()
@@ -140,5 +132,5 @@ def training(filename):
     model.save(googleDrivePath)
 
 fileName = 'data'
-#training('train_' + fileName + '.tfrecords')
+training('train_' + fileName + '.tfrecords')
 #show_image('train_' + fileName + '.tfrecords')
