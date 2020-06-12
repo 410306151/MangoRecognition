@@ -1,6 +1,7 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
 from PIL import Image
 import numpy as np
+import pandas as pds
 import matplotlib.pyplot as plt
 
 gobj = ImageDataGenerator(rescale=1. / 255,
@@ -21,6 +22,7 @@ def imageAugmentation(imageList, folder):
         img.append(img_to_array(Image.open(folder + '/' + name)))
         plt.imshow(array_to_img(img[0]))
         plt.title(name)
+        plt.axis('off')
         plt.show()
         img = np.array(img)
 
@@ -32,13 +34,14 @@ def imageAugmentation(imageList, folder):
 
             plt.subplot(3, 3, 1 + counter)
             plt.imshow(array_to_img(image))
-            # plt.title(counter)
             plt.axis('off')
             counter += 1
             if counter >= 9:
                 break
+        plt.title(name)
         plt.show()
 
-imageList = ['00003.jpg', '00004.jpg', '00005.jpg', '00007.jpg']
+file = pds.read_csv("train.csv")
+imageList = file.iloc[7: 11, 0]
 folder = "C1-P1_Train"
 imageAugmentation(imageList, folder)
