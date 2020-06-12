@@ -3,10 +3,12 @@ import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pds
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.applications import VGG16
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Create a description of the features.
 feature_description = {
@@ -44,12 +46,15 @@ def build_model():
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(Dense(512, activation='relu'))
-    model.add(Dense(3, activation='sigmoid'))
+    model.add(Dense(3, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
                metrics=['acc'])
 
     return model
+
+def loadModel(modelFile):
+    return tf.keras.models.load_model(modelFile)
 
 def getTFRecordsData(filename, googleDrive = 0):
     if googleDrive == 1:
@@ -132,5 +137,5 @@ def training(filename):
     model.save(googleDrivePath)
 
 fileName = 'data'
-training('train_' + fileName + '.tfrecords')
+#training('train_' + fileName + '.tfrecords')
 #show_image('train_' + fileName + '.tfrecords')
